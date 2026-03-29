@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <title>Supabase JSON Demo</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <!-- Dùng unpkg thay cho jsDelivr để tránh bị chặn -->
+  <script src="https://unpkg.com/@supabase/supabase-js"></script>
 </head>
 <body>
   <h1>Test Supabase Storage</h1>
@@ -20,34 +21,29 @@
 
   <script>
     // Thay bằng Project URL và Publishable (anon) key của bạn
-    const SUPABASE_URL = "https://<project-id>.supabase.co";
-    const SUPABASE_KEY = "<publishable-key>";
+    const SUPABASE_URL = "https://opmjnbgrtihvcznxzzji.supabase.co"; // ví dụ
+    const SUPABASE_KEY = "sb_publishable_zdd5PDUq8UoIsR1I1LnFnw_iEefNew9";
 
-    // Đặt tên biến khác để tránh trùng
     const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // Hàm lưu JSON
     async function saveJson(filename, obj) {
       const { error } = await client.storage
-        .from('json-bucket') // đổi đúng tên bucket bạn đã tạo
+        .from('03060810') // đổi đúng tên bucket bạn đã tạo
         .upload(filename, new Blob([JSON.stringify(obj)], { type: 'application/json' }), {
           upsert: true
         });
       if (error) {
-        console.error(error);
         document.getElementById("output").textContent = "Error: " + error.message;
       } else {
         document.getElementById("output").textContent = "Đã lưu " + filename;
       }
     }
 
-    // Hàm đọc JSON
     async function readJson(filename) {
       const { data, error } = await client.storage
         .from('json-bucket')
         .download(filename);
       if (error) {
-        console.error(error);
         document.getElementById("output").textContent = "Error: " + error.message;
         return;
       }
@@ -56,7 +52,6 @@
       document.getElementById("output").textContent = JSON.stringify(obj, null, 2);
     }
 
-    // Gắn event cho form
     document.getElementById("saveForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const val = document.getElementById("inputData").value;
