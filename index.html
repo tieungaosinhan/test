@@ -1,47 +1,47 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <title>Supabase Storage Demo</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+	<meta charset="UTF-8">
+	<title>Supabase Storage Demo</title>
+	<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-  <h1>Demo Supabase Storage</h1>
-  <button onclick="saveData()">Lưu</button>
-  <button onclick="readData()">Đọc</button>
+	<h1>Demo Supabase Storage</h1>
+	<button onclick="saveData()">Lưu</button>
+	<button onclick="readData()">Đọc</button>
 
-  <script>
-    // Thay bằng thông tin project của bạn
-    const SUPABASE_URL = "https://opmjnbgrtihvcznxzzji.supabase.co"; // ví dụ: https://opmjnbgrtihvcznxzzji.supabase.co
-    const SUPABASE_KEY = "sb_publishable_zdd5PDUq8UoIsR1I1LnFnw_iEefNew9"; // Publishable (anon) key
-    const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+	<script>
+		// Thay bằng thông tin project của bạn
+		const SUPABASE_URL = "https://opmjnbgrtihvcznxzzji.supabase.co"; // ví dụ: https://opmjnbgrtihvcznxzzji.supabase.co
+		const SUPABASE_KEY = "sb_publishable_zdd5PDUq8UoIsR1I1LnFnw_iEefNew9"; // Publishable (anon) key
+		const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    async function saveData() {
-      const obj = { message: "Hello Leo", time: new Date().toISOString() };
-      const { error } = await client.storage
-        .from('03060810')
-        .upload('data.json', new Blob([JSON.stringify(obj)], { type: 'application/json' }), {
-          upsert: true
-        });
-      if (error) {
-        console.error("Lỗi khi lưu:", error);
-      } else {
-        console.log("✅ Lưu thành công:", obj);
-      }
-    }
+		async function saveData() {
+			const obj = { message: "Hello Leo", time: new Date().toISOString() };
+			const { error } = await client.storage
+				.from('ks03060810')
+				.upload('data.json', new Blob([JSON.stringify(obj)], { type: 'application/json' }), {
+					upsert: true
+				});
+			if (error) {
+				console.error("Lỗi khi lưu:", error);
+			} else {
+				console.log("✅ Lưu thành công:", obj);
+			}
+		}
 
-    async function readData() {
-      const { data, error } = await client.storage
-        .from('03060810')
-        .download('data.json');
-      if (error) {
-        console.error("Lỗi khi đọc:", error);
-      } else {
-        const text = await data.text();
-        const obj = JSON.parse(text);
-        console.log("📖 Đọc được:", obj);
-      }
-    }
-  </script>
+		async function readData() {
+			const { data, error } = await client.storage
+				.from('ks03060810')
+				.download('data.json');
+			if (error) {
+				console.error("Lỗi khi đọc:", error);
+			} else {
+				const text = await data.text();
+				const obj = JSON.parse(text);
+				console.log("📖 Đọc được:", obj);
+			}
+		}
+	</script>
 </body>
 </html>
