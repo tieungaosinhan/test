@@ -2,65 +2,46 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Supabase JSON Demo</title>
+  <title>Supabase Storage Demo</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-  <h1>Test Supabase Storage</h1>
+  <h1>Demo Supabase Storage</h1>
+  <button onclick="saveData()">Lưu</button>
+  <button onclick="readData()">Đọc</button>
 
-  <form id="saveForm">
-    <label>Nhập dữ liệu:</label><br>
-    <input type="text" id="inputData" placeholder="Ví dụ: Hello Supabase">
-    <button type="submit">Lưu JSON</button>
-  </form>
-
-  <button id="readBtn">Đọc lại JSON</button>
-
-  <pre id="output"></pre>
-
-  <!-- Dùng unpkg thay cho jsDelivr để tránh bị chặn -->
-  <script src="https://unpkg.com/@supabase/supabase-js"></script>
   <script>
-    // Thay bằng Project URL và Publishable (anon) key của bạn
-    const SUPABASE_URL = "https://opmjnbgrtihvcznxzzji.supabase.co"; // ví dụ
-    const SUPABASE_KEY = "sb_publishable_zdd5PDUq8UoIsR1I1LnFnw_iEefNew9";
-
+    // Thay bằng thông tin project của bạn
+    const SUPABASE_URL = "https://opmjnbgrtihvcznxzzji.supabase.co"; // ví dụ: https://opmjnbgrtihvcznxzzji.supabase.co
+    const SUPABASE_KEY = "sb_publishable_zdd5PDUq8UoIsR1I1LnFnw_iEefNew9"; // Publishable (anon) key
     const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    async function saveJson(filename, obj) {
+    async function saveData() {
+      const obj = { message: "Hello Leo", time: new Date().toISOString() };
       const { error } = await client.storage
-        .from('03060810') // đổi đúng tên bucket bạn đã tạo
-        .upload(filename, new Blob([JSON.stringify(obj)], { type: 'application/json' }), {
+        .from('03060810')
+        .upload('data.json', new Blob([JSON.stringify(obj)], { type: 'application/json' }), {
           upsert: true
         });
       if (error) {
-        document.getElementById("output").textContent = "Error: " + error.message;
+        console.error("Lỗi khi lưu:", error);
       } else {
-        document.getElementById("output").textContent = "Đã lưu " + filename;
+        console.log("✅ Lưu thành công:", obj);
       }
     }
 
-    async function readJson(filename) {
+    async function readData() {
       const { data, error } = await client.storage
-        .from('json-bucket')
-        .download(filename);
+        .from('03060810')
+        .download('data.json');
       if (error) {
-        document.getElementById("output").textContent = "Error: " + error.message;
-        return;
+        console.error("Lỗi khi đọc:", error);
+      } else {
+        const text = await data.text();
+        const obj = JSON.parse(text);
+        console.log("📖 Đọc được:", obj);
       }
-      const text = await data.text();
-      const obj = JSON.parse(text);
-      document.getElementById("output").textContent = JSON.stringify(obj, null, 2);
     }
-
-    document.getElementById("saveForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const val = document.getElementById("inputData").value;
-      await saveJson("data.json", { message: val });
-    });
-
-    document.getElementById("readBtn").addEventListener("click", async () => {
-      await readJson("data.json");
-    });
   </script>
 </body>
 </html>
