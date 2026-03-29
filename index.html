@@ -1,47 +1,72 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-	<meta charset="UTF-8">
-	<title>Supabase Storage Demo</title>
-	<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <meta charset="UTF-8">
+  <title>Supabase Storage Demo</title>
 </head>
 <body>
-	<h1>Demo Supabase Storage</h1>
-	<button onclick="saveData()">Lưu</button>
-	<button onclick="readData()">Đọc</button>
+  <h1>Supabase Storage Demo</h1>
+  <button onclick="uploadFile()">Upload file</button>
+  <button onclick="downloadFile()">Download file</button>
+  <button onclick="updateFile()">Update file</button>
+  <button onclick="listFiles()">List files</button>
+  <pre id="output"></pre>
+    <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-	<script>
-		// Thay bằng thông tin project của bạn
-		const SUPABASE_URL = "https://opmjnbgrtihvcznxzzji.supabase.co"; // ví dụ: https://opmjnbgrtihvcznxzzji.supabase.co
-		const SUPABASE_KEY = "sb_publishable_zdd5PDUq8UoIsR1I1LnFnw_iEefNew9"; // Publishable (anon) key
-		const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const SUPABASE_URL = "https://opmjnbgrtihvcznxzzji.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_zdd5PDUq8UoIsR1I1LnFnw_iEefNew9";
+    const bucket = "ks03606810";
 
-		async function saveData() {
-			const obj = { message: "Hello Leo", time: new Date().toISOString() };
-			const { error } = await client.storage
-				.from('ks03060810')
-				.upload('data.json', new Blob([JSON.stringify(obj)], { type: 'application/json' }), {
-					upsert: true
-				});
-			if (error) {
-				console.error("Lỗi khi lưu:", error);
-			} else {
-				console.log("✅ Lưu thành công:", obj);
-			}
-		}
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-		async function readData() {
-			const { data, error } = await client.storage
-				.from('ks03060810')
-				.download('data.json');
-			if (error) {
-				console.error("Lỗi khi đọc:", error);
-			} else {
-				const text = await data.text();
-				const obj = JSON.parse(text);
-				console.log("📖 Đọc được:", obj);
-			}
-		}
-	</script>
+    async function uploadFile() {
+      const fileContent = new Blob([JSON.stringify({ hello: "world" })], { type: 'application/json' });
+      const { data, error } = await supabase.storage
+        .from(bucket)
+        .upload('data.json', fileContent, { upsert: true });
+
+      document.getElementById("output").textContent =
+        error ? "Upload error: " + error.message : "Upload success: " + JSON.stringify(data);
+    }
+
+    async function downloadFile() {
+      const { data, error } = await supabase.storage
+        .from(bucket)
+        .download('data.json');
+
+      if (error) {
+        document.getElementById("output").textContent = "Download error: " + error.message;
+      } else {
+        const text = await data.text();
+        document.getElementById("output").textContent = "File content: " + text;
+      }
+    }
+
+    async function updateFile() {
+      const newContent = new Blob([JSON.stringify({ hello: "updated" })], { type: 'application/json' });
+      const { data, error } = await supabase.storage
+        .from(bucket)
+        .upload('data.json', newContent, { upsert: true });
+
+      document.getElementById("output").textContent =
+        error ? "Update error: " + error.message : "Update success: " + JSON.stringify(data);
+    }
+
+    async function listFiles() {
+      const { data, error } = await supabase.storage
+        .from(bucket)
+        .list('', { limit: 10 });
+
+      document.getElementById("output").textContent =
+        error ? "List error: " + error.message : "Files: " + JSON.stringify(data);
+    }
+
+    window.uploadFile = uploadFile;
+    window.downloadFile = downloadFile;
+    window.updateFile = updateFile;
+    window.listFiles = listFiles;
+  </script>
+
 </body>
 </html>
