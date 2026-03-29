@@ -18,53 +18,35 @@
 
   <pre id="output"></pre>
 
-  <script>
-    // Thay bằng Project URL và Publishable (anon) key của bạn
-    const SUPABASE_URL = "https://opmjnbgrtihvcznxzzji.supabase.co";
-    const SUPABASE_KEY = "YOUR_PUBLISHABLE_KEY_HERE";
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script>
+  const client = supabase.createClient(
+    "https://<project-id>.supabase.co",
+    "<anon-publishable-key>"
+  );
 
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  async function saveJson(filename, obj) {
+    const { error } = await client.storage
+      .from("json-bucket")
+      .upload(filename, new Blob([JSON.stringify(obj)], { type: "application/json" }), {
+        upsert: true
+      });
+    if (error) console.error(error);
+    else console.log("Saved:", filename);
+  }
 
-    // Hàm lưu JSON
-    async function saveJson(filename, obj) {
-      const { error } = await supabase.storage
-        .from('json-bucket') // đổi đúng tên bucket bạn đã tạo
-        .upload(filename, new Blob([JSON.stringify(obj)], { type: 'application/json' }), {
-          upsert: true
-        });
-      if (error) {
-        console.error(error);
-        document.getElementById("output").textContent = "Error: " + error.message;
-      } else {
-        document.getElementById("output").textContent = "Đã lưu " + filename;
-      }
+  async function readJson(filename) {
+    const { data, error } = await client.storage
+      .from("json-bucket")
+      .download(filename);
+    if (error) {
+      console.error(error);
+      return null;
     }
+    const text = await data.text();
+    return JSON.parse(text);
+  }
+</script>
 
-    // Hàm đọc JSON
-    async function readJson(filename) {
-      const { data, error } = await supabase.storage
-        .from('json-bucket')
-        .download(filename);
-      if (error) {
-        console.error(error);
-        document.getElementById("output").textContent = "Error: " + error.message;
-        return;
-      }
-      const text = await data.text();
-      const obj = JSON.parse(text);
-      document.getElementById("output").textContent = JSON.stringify(obj, null, 2);
-    }
-
-    // Gắn event cho form
-    document.getElementById("saveForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const val = document.getElementById("inputData").value;
-      await saveJson("data.json", { message: val });
-    });
-
-    document.getElementById("readBtn").addEventListener("click", async () => {
-      await readJson("data.json");
-    });
-  </script>
 </body>
 </html>
